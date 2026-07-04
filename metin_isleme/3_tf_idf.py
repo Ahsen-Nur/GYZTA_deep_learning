@@ -18,14 +18,18 @@ belgeler = [
 ]
 
 # TF-IDF işlemleri
+
+# TF-IDF vektörizer nesnesi oluştur
 tfidf_vectorizer = TfidfVectorizer()
 
+# belgeleri sayısal vektörlere dönüştür
 belge_vektörleri = tfidf_vectorizer.fit_transform(belgeler)
+
 kelime_kümesi = tfidf_vectorizer.get_feature_names_out() #vocabulary
+
+# belgelerin tf-idf vektör temsillerini elde et
 vektör_temsili = belge_vektörleri.toarray()
 print(f"TF-IDF matrisi:\n{vektör_temsili}\n")
-
-
 df_tfidf = pd.DataFrame(vektör_temsili, columns=kelime_kümesi)
 print(df_tfidf)
 
