@@ -1,0 +1,11 @@
+# Virtual environments
+venv/
+.venv/
+derin_ogrenme/venv/
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# macOS
+.DS_Store
