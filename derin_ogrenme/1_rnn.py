@@ -6,7 +6,7 @@ Amaç:
 Adımlar:
 *kütüphanelerin yüklenmesi(tensorflow mu keras mı pytorch mu)
 *restoran yorumlarını içeren veri setini yükle (simülasyon verisi oluşturma(gpt, gemini, drop))
-*metin ön işleme(tokenization, padding, label encoding) 
+*metin ön işleme(tokenization, padding, label encoding, train-test split) 
 *embedding: word2vec ile sayısal vektörlere dönüştür
 *rnn modeli oluşturma(embedding -> simpleRNN -> Dense layer)
 *modelin derlenmesi ve eğitimi 
@@ -142,3 +142,30 @@ rewiews_data = {
 #dataframe oluştur
 df = pd.DataFrame(rewiews_data)
 print(df.head())
+
+#metin ön işleme
+#tokenization
+tokenizer = Tokenizer() #Metindeki her benzersiz kelimeye bir tam sayı (indeks) atar
+tokenizer.fit_on_texts(df['text']) #Tüm yorumları tarar. Kelime frekans sözlüğü oluşturur: Hangi kelime kaç kez geçmiş
+text_sequences = tokenizer.texts_to_sequences(df['text']) #Artık her yorum, kelime indekslerinin bir listesine dönüşür. Kelime sırası korunur; bu TF-IDF'ten en temel farktır.
+word_index = tokenizer.word_index # sözlük: kelime -> index
+print(word_index)
+
+
+#padding
+max_sequence_length = max(len(seq) for seq in text_sequences) #en uzun yorumun uzunluğunu bulur
+print(f"En uzun yorumun uzunluğu: {max_sequence_length}") 
+
+X = pad_sequences(text_sequences, maxlen=max_sequence_length) #tüm yorumları aynı uzunlukta olacak şekilde sıfırlarla doldurur
+print(f"giriş verisinin boyutu: {X.shape}") #giriş verisinin boyutu: (yorum sayısı, en uzun yorumun uzunluğu)
+print(X)
+
+
+#label encoding
+label_encoder = LabelEncoder() #etiketleri sayısal değerlere dönüştürür
+y = label_encoder.fit_transform(df['label']) #etiketleri sayısal değerlere dönüştürür
+
+
+#train-test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) 
+
