@@ -22,6 +22,7 @@ from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Embedding, SimpleRNN, Dense
 from tensorflow.keras.preprocessing.text import Tokenizer
 
+
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 from gensim.models import Word2Vec
@@ -169,3 +170,74 @@ y = label_encoder.fit_transform(df['label']) #etiketleri sayısal değerlere dö
 #train-test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) 
 
+
+#embedding
+sentences = [text.split() for text in df['text']] 
+
+#word2vec modelini eğit
+word2vec_model = Word2Vec(sentences, vector_size=50, window=5, min_count=1)
+
+embedding_dim = 50 #her kelime 50 boyutlu vektörle temsil edilecek
+
+#embedding matrisini oluştur
+embedding_matrix = np.zeros((len(word_index) + 1, embedding_dim)) #sıfırlarla doldurulmuş bir matris oluşturur
+for word, idx in word_index.items():
+    if word in word2vec_model.wv:
+        embedding_matrix[idx] = word2vec_model.wv[word] 
+
+print(f"embedding matrix: {embedding_matrix}")
+
+
+#model oluşturma
+model = Sequential()
+
+#embedding katmanı
+model.add(Embedding(input_dim=len(word_index) + 1, #kelime sayısı +1
+                    output_dim=embedding_dim, #embedding boyutu
+                    weights=[embedding_matrix], #önceden eğitilmiş word2vec embedding matrisi
+                    input_length=max_sequence_length, #cümlelerin uzunluğu
+                    trainable=False)) #embedding ağırlıkları sabit kalacak
+
+
+#rnn katmanı: units-> gizli katman sayısı, return_sequences-> sadece son çıktıyı return eder
+model.add(SimpleRNN(units = 50, return_sequences = False))
+
+#output katmanı
+model.add(Dense(1, activation= "sigmoid"))
+
+#compile
+model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+
+#training
+model.fit(X_train, y_train,
+          epochs = 10, #eğitim tekrar sayısı
+          batch_size = 2, #mini batch boyutu
+          validation_data = (X_test, y_test) #test seti ile doğrulama
+          ) 
+
+
+#değerlendirme
+test_loss, test_accuracy = model.evaluate(X_test, y_test)
+print(f"Test loss: {test_loss}")
+print(f"Test accuracy: {test_accuracy}")
+
+
+#yeni cümlelerin sınıflandırması için fonk.
+def classify_sentence(sentence):
+    """
+    yeni cümleyi alır, işleme sokar ve model ile sınıflandırmaya çalışır
+    """
+
+    seq = tokenizer.texts_to_sequences([sentence]) #cümleyi sayısal dizilere çevirir
+    padded_seq = pad_sequences(seq, maxlen = max_sequence_length) #cümleyi sayısal diziler çevirir
+
+    prediction = model.predict(padded_seq) #modelden olasılık al
+    prediced_class = (prediction > 0.5).astype(int) #0.5 üstü positive etiket alır
+
+    label = "positive" if prediced_class[0][0] == 1 else "negative"
+    return label
+
+
+new_sentence = "restoran çok temizdi ve yemekler çok güzeldi"
+result = classify_sentence(new_sentence)
+print(result)
