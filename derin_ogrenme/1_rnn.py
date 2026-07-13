@@ -172,15 +172,22 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_
 
 
 #embedding
-sentences = [text.split() for text in df['text']] 
+sentences = [text.split() for text in df['text']] #Her yorumu boşluklardan bölüp kelime listesine çevirir. Word2Vec ham metin değil, token listesi ister
 
 #word2vec modelini eğit
-word2vec_model = Word2Vec(sentences, vector_size=50, window=5, min_count=1)
+word2vec_model = Word2Vec(sentences, 
+                          vector_size=50, 
+                          window=5, #Bir kelimenin bağlam penceresi: sağda ve solda 5'er komşu kelimeye bakarak ilişki öğrenir
+                          min_count=1 #Sadece 1 kez geçen kelimeleri bile dahil et
+                          )
 
 embedding_dim = 50 #her kelime 50 boyutlu vektörle temsil edilecek
 
 #embedding matrisini oluştur
-embedding_matrix = np.zeros((len(word_index) + 1, embedding_dim)) #sıfırlarla doldurulmuş bir matris oluşturur
+embedding_matrix = np.zeros((len(word_index) + 1, #Tokenizer 1'den indekslemeye başlar. 0 indeksi padding için ayrıktır. O yüzden matrisin satır sayısı toplam kelime sayısı + 1'dir. İlk satır (0) sıfırlarla doldurulur.
+                             embedding_dim
+                             )) #sıfırlarla doldurulmuş bir matris oluşturur
+
 for word, idx in word_index.items():
     if word in word2vec_model.wv:
         embedding_matrix[idx] = word2vec_model.wv[word] 
@@ -192,14 +199,15 @@ print(f"embedding matrix: {embedding_matrix}")
 model = Sequential()
 
 #embedding katmanı
-model.add(Embedding(input_dim=len(word_index) + 1, #kelime sayısı +1
+model.add(Embedding(input_dim=len(word_index) + 1, #sözlükteki toplam kelime sayısı +1
                     output_dim=embedding_dim, #embedding boyutu
                     weights=[embedding_matrix], #önceden eğitilmiş word2vec embedding matrisi
                     input_length=max_sequence_length, #cümlelerin uzunluğu
-                    trainable=False)) #embedding ağırlıkları sabit kalacak
+                    trainable=False #embedding ağırlıkları sabit kalacak
+                    )) 
 
 
-#rnn katmanı: units-> gizli katman sayısı, return_sequences-> sadece son çıktıyı return eder
+#rnn katmanı: units-> gizli katman sayısı, return_sequences-> sadece son çıktıyı return eder. son hafıza durumunu verir.
 model.add(SimpleRNN(units = 50, return_sequences = False))
 
 #output katmanı
@@ -210,9 +218,9 @@ model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"]
 
 #training
 model.fit(X_train, y_train,
-          epochs = 10, #eğitim tekrar sayısı
-          batch_size = 2, #mini batch boyutu
-          validation_data = (X_test, y_test) #test seti ile doğrulama
+          epochs = 10, #Tüm eğitim verisini 10 kez baştan sona oku. Her turda ağırlıklar güncellenir
+          batch_size = 2, #Her seferinde 2 örnek al, hata hesapla, ağırlıkları güncelle.
+          validation_data = (X_test, y_test) #her epoch sonunda test seti ile doğrulama
           ) 
 
 
