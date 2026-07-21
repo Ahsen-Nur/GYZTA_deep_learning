@@ -36,6 +36,13 @@ def predict_answer(context, question):
     #return_tensors: çıktıyı pytorch formatına çevirir
     #max_length: bert'in max token kapasitesi
     #truncation: matin 512 tokendan uzunsa keser
+    """
+    encode_plus çıktıları:
+
+    input_ids:	Her tokenın sayısal kimliği
+    attention_mask:	Hangi tokenlar gerçek, hangileri padding? (1 = gerçek, 0 = padding)
+    token_type_ids:	Hangi tokenlar soruya, hangileri metne ait? (0 = soru, 1 = metin)
+    """
     encoding= tokenizer.encode_plus(question, 
                                     context, 
                                     return_tensors= "pt", 
@@ -56,11 +63,12 @@ def predict_answer(context, question):
         start_scores, end_scores= model(input_ids, attention_mask= attention_mask, return_dict= False)
 
     #en yüksek olasılıklı başlangıç ve bitiş token indeksleri al
+    # .item() ile PyTorch tensoründen Python int'ine çevirir.
     start_index= torch.argmax(start_scores, dim=1).item()
-    end_index= torch.argmax(start_scores, dim=1).item()
+    end_index= torch.argmax(end_scores, dim=1).item()
 
     #input_ids üzerinden cevaba denk gelen token aralığını al
-    answer_tokens= tokenizer.convert_ids_to_tokens(input_ids[0][start_index: end_index +1])
+    answer_tokens= tokenizer.convert_ids_to_tokens(input_ids[0][start_index: end_index +1]) #slicing [:] bitiş indeksini dahil etmez. end_index'i de almak için +1 eklenir.
 
     #tokenları birleştirerek okunabilir yazı haline getir
     answer= tokenizer.convert_tokens_to_string(answer_tokens)
