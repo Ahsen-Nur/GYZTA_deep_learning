@@ -27,14 +27,22 @@ max_sequence_length=200 #her yorum 200 kelimeden oluşacak
 print(f"Train boyutu: {len(X_train)}, test boyutu: {len(X_test)}")
 
 #padding
-X_train_padded = pad_sequences(X_train, maxlen = max_sequence_length)
-X_test_padded = pad_sequences(X_test, maxlen = max_sequence_length)
+#padding='pre' (baştan doldur), truncating='pre' (baştan kes)
+#Dil modelleri genellikle cümlenin sonunu daha iyi hatırlar. Baştan kesmek/eklemek, son kelimelerin model tarafından görülmesini garanti eder.
+X_train_padded = pad_sequences(X_train, maxlen = max_sequence_length, padding='pre', truncating='pre')
+X_test_padded = pad_sequences(X_test, maxlen = max_sequence_length, padding='pre', truncating='pre')
 
 print(f"X_train şekli:{X_train_padded.shape}")
 print(f"X_test şekli:{X_test_padded.shape}")
 
 
 #model oluşturma
+
+#embedding layer
+#Bu katman, (25000, 200) boyutundaki girdiyi (25000, 200, 100) boyutuna çevirir.
+#Her 0-9999 arası tam sayı, 100 boyutlu bir öğrenilebilir vektör ile değiştirilir. 
+#Bu vektörler modelin eğitilebilir parametreleridir; başlangıçta rastgele atanır ve 
+# geri yayılım (backpropagation) ile güncellenir.
 embedding_dim=100 #kelimeler 100 boyutlu vektörler ile temsil edilsin
 
 model = Sequential()
@@ -49,6 +57,7 @@ model.add(Embedding(input_dim=num_words,
 model.add(GRU(units=64,
               return_sequences=False))
 
+#output layer
 model.add(Dense(1, activation="sigmoid"))
 
 
