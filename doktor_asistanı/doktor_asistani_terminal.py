@@ -49,7 +49,7 @@ if not api_key:
 
 #llm tanımla
 llm= ChatGoogleGenerativeAI(
-    model= "gemini-2.5-flash",
+    model= "gemini-flash-latest",
     temperature= 0.7, #cevap çeşitliliği (0: kesin | 1:yaratıcı)
     google_api_key= api_key
 
