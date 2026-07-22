@@ -49,7 +49,7 @@ if not api_key:
 
 #llm tanımla
 llm= ChatGoogleGenerativeAI(
-    model= "gemini-2.5-flash-lite",
+    model= "gemini-2.5-flash",
     temperature= 0.7, #cevap çeşitliliği (0: kesin | 1:yaratıcı)
     google_api_key= api_key
 
@@ -75,11 +75,15 @@ history= input("Hasta geçmişi: öksürük, yüksek ateş, bulantı ve kusma.")
 
 
 #prompt tanımlama
-intro= (
-    f"sen bir doktor asistanısın. hasta {name}, {age} yaşında. sağlık geçmişi şu şekilde {history}."
-    "sağlık sorunları hakkında konuşmak istiyor. yaşına uygun, sağlık geçmişini dikkate alarak" \
-    "dikkatli ve nazik tavsiyeler ver; ismiyle hitap et."
+intro= (f"""
+    sen bir doktor asistanısın. 
+    hasta {name}, {age} yaşında. 
+    sağlık geçmişi şu şekilde {history}.
 
+    sağlık sorunları hakkında konuşmak istiyor. 
+    yaşına uygun, sağlık geçmişini dikkate alarak dikkatli ve nazik tavsiyeler ver; 
+    ismiyle hitap et.
+"""
 )
 
 
