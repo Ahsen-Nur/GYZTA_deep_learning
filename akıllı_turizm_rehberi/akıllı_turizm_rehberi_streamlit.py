@@ -3,7 +3,7 @@ web üzerinde çalışan chatbot ekranı geliştirme
 streamlit freamwork
 """
 
-import streamlit as st
+import akıllı_turizm_rehberi_streamlit as st
 from langchain.chat_models import ChatOllama #ollama üzerinden gemma çağırmak için
 from langchain.schema import SystemMessage, HumanMessage #sobet mesajları
 from langchain.memory import ConversationBufferMemory 
@@ -59,4 +59,4 @@ for msg in st.session_state.memory.chat_memory.messages:
 
 
 
-#streamlit run streamlit.py
+#streamlit run akıllı_turizm_rehberi_streamlit.py
