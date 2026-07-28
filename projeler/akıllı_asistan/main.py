@@ -7,7 +7,7 @@ amaç:
     *Kısaca asistan notlara ve etkinliklere erişim sağlayarak özetleme, bilgi çıkarma veya takvim oluşturma gibi görevleri gerçekleştirecek
 
 model:
-    *google gemini-2.0-flash modeli
+    *google gemini-3.1-flash modeli
 
 planlama:
     *assistant.py: gemini ile chatbot oluşturma

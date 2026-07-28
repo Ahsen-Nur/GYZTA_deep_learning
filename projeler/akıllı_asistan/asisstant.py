@@ -12,7 +12,7 @@ if not api_key:
     raise ValueError("GEMINI_API_KEY .env dosyasında tanımlı değil.")
 
 
-#gemini 2.0 flash modeline ait api url
+#gemini modeline ait api url
 url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key={api_key}"
 
 #api çağrısı için gerekli http başlıkları
