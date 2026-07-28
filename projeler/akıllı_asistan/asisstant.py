@@ -52,8 +52,26 @@ def get_gemini_response(prompt: str) -> str:
         return f"api hatasi {response.status_code}: {response.text}"
 
 
-def detect_intent():
-    pass
+def detect_intent(message):
+    """
+    kullanıcının mesajı doğrultusunda intent classification yapar yani kullanıcının 
+    ne sorduğunu anlar ve ona göre yönlendirme yani routing yapar
+    """
+
+    prompt= f"""
+        Kullanıcının aşağıdaki cümlesini sınıflandır:
+        Etiketlerden sadece birini döndür:
+        -not_ozet(eğer notlar ile ilgili bir soru sorduysa ya da özetlemek istiyorsa)
+        -etkinlik_ozet(eğer etkinlikler ile ilgili bir soru sorduysa ya da etkinlik özeti istiyorsa)
+        -normal(diğer her şey)
+
+        cümle: "{message}
+        yalnızca etiket döndür: (örnek: not_ozet)
+        """
+
+    response= get_gemini_response(prompt)
+    return response.strip().lower()
+    
 
 
 if __name__ == "__main__":
