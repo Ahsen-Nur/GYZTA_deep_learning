@@ -8,7 +8,7 @@ from langchain_community.tools import Tool
 from langchain_text_splitters import RecursiveCharacterTextSplitter #metni chunklara(parça) ayırır
 from langchain_community.embeddings import HuggingFaceEmbeddings #embedding oluşturma
 from langchain_community.vectorstores import FAISS #vektör db
-from langchain_community.chains import ConversationalRetrievalChain #zincir oluşturma
+from langchain_classic.chains import ConversationalRetrievalChain #zincir oluşturma
 
 
 def create_rag_tool(pdf_path: str, llm):
@@ -37,7 +37,7 @@ def create_rag_tool(pdf_path: str, llm):
     retriever= db.as_retriever(search_kwargs= {"k": 3})
 
     #rag zinciri oluşturma
-    rag_chain= ConversationalRetrievalChain(
+    rag_chain= ConversationalRetrievalChain.from_llm(
         llm= llm,
         retriever= retriever,
         return_source_documents= False
@@ -48,9 +48,10 @@ def create_rag_tool(pdf_path: str, llm):
         """
         soruya göre PDF'ten en alakalı bilgiyi getirir.
         """
-        
-        response= rag_chain.run({"question": query, "chat_history": []})
-        return f"Belgede bulunan bilgi: {response}"
+
+        response = rag_chain.invoke({"question": query, "chat_history": []})
+        answer = response.get("answer") if isinstance(response, dict) else str(response)
+        return f"Belgede bulunan bilgi: {answer}"
 
     return Tool(
         name=  "RAGTool",
